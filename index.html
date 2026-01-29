@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Randomizer</title>
+    <style>
+        :root {
+            --primary-color: #6200ea;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --prompt-bg: #f9fafb;
+            --prompt-border: #e5e7eb;
+            --btn-bg: #ffffff;
+            --btn-border: #d1d5db;
+            --btn-text: #4b5563;
+            --btn-hover-bg: #f3f4f6;
+            --btn-hover-border: #9ca3af;
+            --card-label: #666;
+        }
+        body.dark-mode {
+            --primary-color: #b388ff;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --prompt-bg: #2d2d2d;
+            --prompt-border: #404040;
+            --btn-bg: #2d2d2d;
+            --btn-border: #404040;
+            --btn-text: #e0e0e0;
+            --btn-hover-bg: #3d3d3d;
+            --btn-hover-border: #666;
+            --card-label: #aaa;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+        button.generate-btn {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s, background-color 0.2s;
+            font-weight: bold;
+        }
+        body:not(.dark-mode) button.generate-btn {
+            color: white;
+        }
+        button.generate-btn:hover {
+            filter: brightness(0.9);
+        }
+        button.generate-btn:active {
+            transform: scale(0.98);
+        }
+        button.copy-all-btn {
+            background-color: var(--card-bg);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.2s;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        button.copy-all-btn:hover {
+            background-color: var(--btn-hover-bg);
+        }
+        button.copy-all-btn:active {
+            transform: scale(0.98);
+        }
+        button.copy-all-btn.copied {
+            background-color: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0 10px;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .theme-toggle-btn:active {
+            transform: scale(0.9);
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .card-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--card-label);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .card-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .prompt-text {
+            font-size: 16px;
+            line-height: 1.4;
+            flex-grow: 1;
+            background: var(--prompt-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--prompt-border);
+            min-height: 24px;
+            word-wrap: break-word;
+        }
+        .copy-btn {
+            background-color: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--btn-text);
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        .copy-btn:hover {
+            background-color: var(--btn-hover-bg);
+            border-color: var(--btn-hover-border);
+        }
+        .copy-btn.copied {
+            background-color: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+        @media (max-width: 480px) {
+            .card-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .copy-btn {
+                width: 100%;
+                text-align: center;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+<div class="container">
+    <h1>Prompt Randomizer</h1>
+    <div class="controls">
+        <button class="generate-btn" onclick="randomizeAll()">Generate New Prompt</button>
+        <button class="copy-all-btn" onclick="copyAll(this)">Copy All</button>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark Mode">☀️</button>
+    </div>
+    <div id="app">
+        <!-- Cards will be injected here -->
+    </div>
+</div>
+
+<script>
+    // Data embedded from CSV
+    const categories = {
+        "Locations": [
+            "A blooming, indoor floral installation", "A breezy, rooftop city skyline", "A bright, airy sunroom with plants", "A chaotic, artist’s cluttered studio", "A cold, metallic vault door", "A cozy, fireplace-lit cabin rug", "A crisp, modern Scandinavian bedroom", "A crumbling, abandoned stone chateau", "A dark, mahogany-paneled study", "A dark, slate-tiled spa room", "A dense, fern-covered forest floor", "A dimly lit, narrow hallway", "A dramatic, spotlighted red carpet", "A glittering, sequin-backdrop stage", "A glowing, backlit jacuzzi edge", "A golden-hour, sandy private beach", "A grand, velvet-curtained theater box", "A hazy, morning-lit kitchen counter", "A hazy, smoke-filled jazz lounge", "A minimalist, concrete industrial apartment", "A misty, secluded outdoor hot spring", "A moody, candlelit vintage library", "A moonlit, calm lake dock", "A plush, faux-fur covered window seat", "A rain-streaked, foggy glass shower", "A raw, unfinished wooden barn", "A reflective, antique standing mirror", "A rich, emerald-green velvet sofa", "A romantic, canopy-covered four-poster bed", "A rustic, exposed-brick attic space", "A rustic, hay-bale filled stable", "A secluded, bohemian macramé lounge", "A secluded, rocky waterfall base", "A serene, rose-petal filled bath", "A shadowed, overgrown ivy wall", "A shadowed, wrought-iron spiral staircase", "A sheer, fabric-tented reading nook", "A sheer, waterfall-style curtain divider", "A shimmering, indoor mosaic pool", "A slick, wet black-marble floor", "A snowy, glass-walled winter chalet", "A soft, morning-mist balcony", "A soft, satin-draped vanity corner", "A stark, high-contrast shadow wall", "A steamy, clawfoot bathtub", "A sun-drenched, white-washed loft", "A towering, floor-to-ceiling bookshelf", "A twilight, lantern-lit garden path", "A vintage, peeling-paint dressing room", "A wild, tall-grass open meadow"
+        ],
+        "Lighting Styles": [
+            "Backlit, halo effect", "Bi-color, teal and orange", "Bright, clean high-key", "Classic, dramatic Rembrandt", "Cold, clinical fluorescent", "Cool, cyan shadows", "Cool, moody blue hour", "Cozy, fireplace embers", "Creamy, softbox diffusion", "Dappled, filtered sunbeams", "Dark, mysterious low-key", "Deep, heavy chiaroscuro", "Deep, twilight shadows", "Desaturated, metallic greys", "Dreamy, soft-focus bloom", "Dynamic, neon noir gels", "Edgy, silhouette rim light", "Ethereal, sunrise mist", "Flat, overcast diffusion", "Flickering, warm candlelight", "Glowing, beauty-dish clamshell", "Gritty, street-lamp spill", "Halo, ring-light reflection", "Hard, direct spotlight", "Harsh, midday contrast", "Hazy, morning window light", "High-contrast, noir grit", "Intense, ultraviolet purples", "Muted, matte-finish tones", "Narrow, shadowing short lighting", "Pale, silver moonlight", "Pastel, candy-colored wash", "Prismatic, rainbow light leaks", "Sharp, divided split lighting", "Sharp, specular highlights", "Side-lit, texture revealing", "Soft, cinematic haze", "Soft, flattering butterfly", "Soft, golden hour glow", "Striped, venetian blind shadows (Gobois)", "Subtle, angled loop lighting", "Top-down, interrogator style", "Underwater, caustic ripples", "Up-lit, spooky shadows", "Vibrant, saturated red wash", "Vintage, sepia-toned warmth", "Volumetric, dusty God rays", "Warm, sunset gradient", "Warm, tungsten lamp glow", "Wide, illuminating broad lighting"
+        ],
+        "Camera Angles & Compositions": [
+            "Abstract, body landscape (curves only)", "Abstract, reflection in a shattered mirror", "Active, walking away motion", "Architectural, framing with window panes", "Artistic, macro skin texture detail", "Candid, looking-away profile", "Casual, lying-on-stomach eye level", "Cinematic, over-the-shoulder perspective", "Classic, waist-up medium shot", "Compressed, telephoto portrait depth", "Detailed, focus on jewelry/accessories", "Disorienting, artistic Dutch tilt", "Distant, full-body wide shot", "Distorted, fisheye artistic lens", "Dominant, low-angle upward view", "Dreamy, double-exposure composition", "Dynamic, rule-of-thirds placement", "Elegant, 3/4 turned portrait", "Elevated, balcony looking down", "Expansive, wide-angle environmental shot", "Flattering, slightly elevated selfie-angle", "Focused, shallow depth-of-field (bokeh)", "Framing, view through sheer curtains", "Grounded, focus on bare feet/legs", "Immersive, first-person point of view (POV)", "Intimate, extreme close-up (eyes/lips)", "Intimate, nose-to-nose proximity", "Isolated, negative space minimal framing", "Linear, leading lines hallway shot", "Mysterious, silhouette against backlight", "Narrative, view from behind (back focus)", "Overview, top-down bird’s eye", "Peek-a-boo, partially obscured face", "Receding, mirror-within-a-mirror (infinity)", "Relaxed, reclining chaotic angle", "Relaxed, seated cross-legged angle", "Romantic, soft-focus foreground blur", "sensual, focus on hands/touch", "Sharp, focus on hair movement", "Sharp, profile silhouette", "Soft, kneeling perspective", "Standard, direct eye-level connection", "Storytelling, low-to-ground worm’s eye", "Symmetrical, centered composition", "Tense, gripping sheets detail", "Tight, head-and-shoulders crop", "Vintage, vignette-heavy framing", "Voyeuristic, through-the-doorway framing", "Vulnerable, high-angle downward view", "Wide, panoramic room view"
+        ],
+        "Film Stocks & Visual Aesthetics": [
+            "Artistic, charcoal sketch hybrid", "Blue, cyanotype print style", "Bright, overexposed high-key dreamy", "Clean, digital crispness (ARRI Alexa style)", "Cool, 1980s blue-flash aesthetic", "Cool, daylight-balanced Cinestill 50D", "Dark, moody underexposed negative", "Dramatic, deep-black Ilford HP5 Plus (B&W)", "Dreamy, instant Polaroid 600", "Edgy, high-structure clarity", "Ethereal, infrared Kodak Aerochrome", "Experimental, color-shifting LomoChrome Purple", "Faded, expired film color shifts", "Glitchy, VHS tape distortion", "Gloomy, cool-toned tungsten slide", "Glossy, high-specular magazine print", "Grainy, pushed ISO 3200 texture", "Gritty, high-contrast Kodak Tri-X 400 (B&W)", "Grunge, 1990s dirty texture", "Harsh, cross-processed slide film", "Hazy, light-leak damaged film", "High-key, blown-out white fashion", "Historic, antique Wet Plate Collodion", "Intense, acid-wash neon colors", "Lo-fi, disposable camera aesthetic", "Low-key, crushed blacks noir", "Metallic, silver-rich Daguerreotype", "Minimal, flat matte finish", "Moody, cinematic Cinestill 800T (Halos)", "Muted, desaturated bleach bypass", "Natural, true-to-life neutral balanced", "Nostalgic, warm-toned Kodak Gold 200", "Pastel, airy Fujifilm Pro 400H", "Radiant, halation-heavy diffusion", "Rich, saturated Fujifilm Velvia 50", "Romantic, soft-focus diffusion filter", "Rough, street-style Agfa Vista 400", "Rusty, tintype metal plate", "Sharp, 8k hyper-realistic digital", "Sharp, clinical Fujifilm Acros 100 (B&W)", "Soft, diffuse glamorous bloom", "Soft, skin-tone perfect Kodak Portra 400", "Soft, washed-out Polaroid SX-70", "Subtle, low-contrast pastel wash", "Textured, canvas-print effect", "Vibrant, fine-grain Kodak Ektar 100", "Vintage, classic Kodachrome 64", "Vivid, Technicolor saturation", "Warm, 1970s yellow-cast vintage", "Warm, sepia-toned vintage print"
+        ],
+        "Photography Styles": [
+            "70s Boho Chic Boudoir Photography with Warm film grain, shag rugs, macramé, lens flare, natural hair.", "80s High Gloss Boudoir Photography with Helmut Newton style, sharp flash, power suits, hyper-sexualized confidence.", "90s Grunge Glam Boudoir Photography with Smudged eyeliner, fishnets, torn denim, messy hair, heroin chic aesthetic.", "Bodyscape Boudoir Photography with Macro photography, curves as landscapes, abstract skin texture, no face.", "Calvin Klein 90s Boudoir Photography with Greyscale, athletic, ribbed cotton, simple, raw vulnerability.", "Corporate Edge Boudoir Photography with Sharp blazers, \"air tie\" styling (buttoned top collar, no tie), cold office lighting.", "Cyberpunk Neon Boudoir Photography with Pink/blue gels, wet skin, reflective surfaces, futuristic lingerie.", "Dark Academia Boudoir Photography with Tweed, leather bound books, plaid skirts, mood lighting, intellectual vibe.", "Denim on Denim Boudoir Photography with Blue jean texture, casual, american classic.", "Double Exposure Boudoir Photography with Silhouette filled with forest or city textures, ghostly overlay.", "Film Noir Boudoir Photography with High contrast black and white, venetian blind shadows, femme fatale mystery.", "French New Wave Boudoir Photography with Grainy B&W, handheld camera feel, nonchalant cool, cigarette smoke (atmospheric).", "Fur & Warmth Boudoir Photography with Faux fur coats, winter cabin, firelight glow, tactile softness.", "Glitch Art Boudoir Photography with Digital distortion lines, VHS static, RGB shift, data-moshing effects.", "Gold Leaf Boudoir Photography with Gold flakes on skin, metallic texture, rich opulence.", "High-Key Fashion Boudoir Photography with Blown-out white background, studio strobe, perfect skin, commercial look.", "Hollywood Golden Age Boudoir Photography with 1930s glamour, soft focus, mid-Atlantic elegance, satin sheen.", "Impressionist Blur Boudoir Photography with Dappled light, soft brushstrokes, Monet garden vibes, indistinct edges.", "Industrial Raw Boudoir Photography with Concrete walls, exposed pipes, cold blue tones, harsh shadows.", "Latex & Shine Boudoir Photography with High specular highlights, tight black rubber, fetish aesthetic.", "Leather & Chrome Boudoir Photography with Biker jacket, motorcycle reflection, tough texture.", "Liquid Metal Boudoir Photography with Silver body paint, high contrast chrome look, futuristic robot-chic.", "Luxury Hotel Boudoir Photography with Crisp white sheets, beige tones, gold fixtures, expensive neutrality.", "Matte Pastel Boudoir Photography with Wes Anderson color palette, symmetry, soft pinks and powder blues, flat lighting.", "Pin-Up Pop Boudoir Photography with 1950s Gil Elvgren style, bright Technicolor, playful, cheeky poses.", "Prismatic Light Boudoir Photography with Shooting through crystal, rainbows across the face, fractured reflections.", "Renaissance Oil Boudoir Photography with Chiaroscuro lighting, fleshy tones, soft drapery, painterly texture.", "Roaring Twenties Boudoir Photography with Art Deco geometry, flapper aesthetics, pearls, dramatic smoky eyes.", "Scandi-Minimalism Boudoir Photography with White-on-white, natural window light, organic cotton, clean lines.", "Sheer & Tulle Boudoir Photography with Layered transparency, cloudy effect, ballerina aesthetic.", "Silk & Satin Boudoir Photography with Flowing fabric, ripples, liquid reflection, soft luxury.", "Sketch & Ink Boudoir Photography with Pencil sketch overlay on photo, mixed media, rough charcoal edges.", "Smoke & Mirrors Boudoir Photography with Haze machine, multiple reflections, mysterious depth.", "Street Style Boudoir Photography with Hoodie and panties, sneakers, urban backdrop, natural movement.", "Surrealist Dream Boudoir Photography with Floating fabrics, melting clocks, impossible geometry, Dali-esque distortions.", "Vaporwave Boudoir Photography with Purple grids, roman statues, retro computer graphics, nostalgic haze.", "Velvet Crush Boudoir Photography with Deep absorbing blacks, rich reds, tactile fuzz.", "Victorian Gothic Boudoir Photography with Dark lace, corsets, candlelight, heavy velvet curtains, melancholic mood.", "Watercolor Wash Boudoir Photography with Bleeding colors, wet paper texture, soft and romantic edges.", "Wet Look Boudoir Photography with Drenched clothes, rain room, water droplets on skin, slick hair."
+        ]
+    };
+
+    const app = document.getElementById('app');
+
+    function init() {
+        // Create DOM elements for each category
+        for (const [key, values] of Object.entries(categories)) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const label = document.createElement('div');
+            label.className = 'card-label';
+            label.textContent = key;
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'prompt-text';
+            textDiv.id = `text-${key.replace(/\s+/g, '-')}`;
+            textDiv.textContent = '...';
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.onclick = () => copyToClipboard(textDiv.textContent, copyBtn, 'Copy');
+            
+            content.appendChild(textDiv);
+            content.appendChild(copyBtn);
+            
+            card.appendChild(label);
+            card.appendChild(content);
+            app.appendChild(card);
+        }
+        randomizeAll();
+    }
+
+    function randomizeAll() {
+        for (const [key, values] of Object.entries(categories)) {
+            const randomValue = values[Math.floor(Math.random() * values.length)];
+            const textId = `text-${key.replace(/\s+/g, '-')}`;
+            const textDiv = document.getElementById(textId);
+            if (textDiv) {
+                textDiv.textContent = randomValue;
+            }
+            // Reset copy buttons
+            const btns = document.querySelectorAll('.copy-btn');
+            btns.forEach(btn => {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+            });
+            const copyAllBtn = document.querySelector('.copy-all-btn');
+            if (copyAllBtn) {
+                copyAllBtn.textContent = 'Copy All';
+                copyAllBtn.classList.remove('copied');
+            }
+        }
+    }
+
+    function copyAll(btnElement) {
+        const allText = [];
+        const textDivs = document.querySelectorAll('.prompt-text');
+        textDivs.forEach(div => allText.push(div.textContent));
+        const combinedText = allText.join(', ');
+        copyToClipboard(combinedText, btnElement, 'Copy All');
+    }
+
+    function copyToClipboard(text, btnElement, resetText = 'Copy') {
+        navigator.clipboard.writeText(text).then(() => {
+            btnElement.textContent = 'Copied!';
+            btnElement.classList.add('copied');
+            setTimeout(() => {
+                btnElement.textContent = resetText;
+                btnElement.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            // Fallback for older browsers or non-secure contexts
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                btnElement.textContent = 'Copied!';
+                btnElement.classList.add('copied');
+                setTimeout(() => {
+                    btnElement.textContent = resetText;
+                    btnElement.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        });
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const btn = document.querySelector('.theme-toggle-btn');
+        if (document.body.classList.contains('dark-mode')) {
+            btn.textContent = '☀️';
+        } else {
+            btn.textContent = '🌙';
+        }
+    }
+
+    // Initialize app
+    init();
+
+</script>
+
+</body>
+</html>
